@@ -18,5 +18,8 @@
   "license": "BSD",
   "dependencies": {
     "restler": "~2.0.1"
-  }
+  },
+  "directories" : { "doc" : ".",
+  "test" : null,
+  "example" :  null}
 }

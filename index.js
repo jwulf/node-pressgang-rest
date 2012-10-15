@@ -5,7 +5,7 @@
  * A module for communicating with a PressGang CCMS server via its REST interface
  * https://github.com/jwulf/pressgang-ccms-rest-node
  * 
-/*!
+*/
 
 
 module.exports = require('./pressgangccms.js');

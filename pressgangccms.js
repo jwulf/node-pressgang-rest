@@ -13,7 +13,7 @@ var util = require('util');
 
 exports = module.exports = PressGangCCMS;
 
-function PressGangCCMS(url, options){
+function PressGangCCMS (url, options){
     this.url = url || '';   
     this.settings = {
         username: '',
@@ -45,7 +45,7 @@ PressGangCCMS.prototype.set = function (key, value) {
 };
 
 
-PressGangCCMS.prototype.getTopicData = function(topic, data_request, cb)
+PressGangCCMS.prototype.getTopicData = function(topic_id, data_request, cb)
 {
     if (this.settings.url && (this.settings.url !== ''))
     {
@@ -55,7 +55,7 @@ PressGangCCMS.prototype.getTopicData = function(topic, data_request, cb)
         switch(data_request){
          
          case 'xml':
-           requestpath = '/seam/resource/rest/1/topic/get/xml/' + topic.id +'/xml';
+           requestpath = '/seam/resource/rest/1/topic/get/xml/' + topic_id +'/xml';
            break;
            
         }
