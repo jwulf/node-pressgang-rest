@@ -1,0 +1,22 @@
+{
+  "name": "pressgang-ccms-rest-node",
+  "version": "0.0.1",
+  "description": "Manages communication with a PressGang CCMS Server via its REST interface",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/jwulf/pressgang-ccms-rest-node.git"
+  },
+  "keywords": [
+    "pressgang",
+    "rest"
+  ],
+  "author": "Joshua Wulf",
+  "license": "BSD",
+  "dependencies": {
+    "restler": "~2.0.1"
+  }
+}
