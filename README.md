@@ -20,26 +20,26 @@ Next, create a new PressGangCCMS object:
 var pressgang = new PressGangCCMS('http://127.0.0.1:8080/TopicIndex');
 ```
 
-Now, you can get the xml of a topic:
+Now, you can get the XML of a topic:
 
 ```js
 pressgang.getTopicData('xml', 8445, 
-	function(err, xml){
-		console.log('The topic xml content is:' + xml);
+	function(err, result){
+		console.log('The topic xml content is:' + result);
 	});
 ```
 
-To get the json representation of a topic:
+To get the JSON representation of a topic:
 
 ```js
 pressgang.getTopicData('json', 8445, 
-	function(err, xml){
+	function(err, result){
 		console.log('The JSON representation of the topic is:' 
-		+ JSON.Stringify(json);
+		+ JSON.Stringify(result);
 	});
 ```
 
-`isContentSpec` is an example of the PressGangCCMS module's semantic interface to PressGang:
+`isContentSpec` is an example of a more semantic interface to PressGang:
 
 ```js
 pressgang.isContentSpec(456, 
