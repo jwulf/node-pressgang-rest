@@ -11,10 +11,10 @@ var rest = require('restler');
 var eventEmitter = require('events').EventEmitter;
 var util = require('util');
 
-exports.PressGangCCMS = PressGangCCMS;
+module.exports.PressGangCCMS = PressGangCCMS;
 
 function PressGangCCMS (url, options){
-    this.url = url || '';   
+    this.url = url;   
     this.settings = {
         username: '',
         authmethod: '',
@@ -46,7 +46,7 @@ PressGangCCMS.prototype.set = function (key, value) {
 
 PressGangCCMS.prototype.getTopicData = function(topic_id, data_request, cb)
 {
-    if (this.settings.url && (this.settings.url !== ''))
+    if (this.url && (this.url !== ''))
     {
         var requestpath;
 
