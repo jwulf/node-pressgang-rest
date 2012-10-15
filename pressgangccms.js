@@ -11,7 +11,7 @@ var rest = require('restler');
 var eventEmitter = require('events').EventEmitter;
 var util = require('util');
 
-exports = module.exports = PressGangCCMS;
+exports.PressGangCCMS = PressGangCCMS;
 
 function PressGangCCMS (url, options){
     this.url = url || '';   
@@ -19,9 +19,10 @@ function PressGangCCMS (url, options){
         username: '',
         authmethod: '',
         authtoken: '',
-	restver: 1
+		restver: 1
     }
- 
+
+	util.inherits(PressGangCCMS, eventEmitter); 
     if (options && options.key){
         for (var i in options) {
             if (options.hasOwnProperty(i)) {
@@ -30,8 +31,6 @@ function PressGangCCMS (url, options){
         }
     }
 }
-
-util.inherits(PressGangCCMS, eventEmitter);
 
 PressGangCCMS.prototype.get = function (key) {
   return this.settings[key];
