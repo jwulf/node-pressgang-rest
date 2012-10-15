@@ -1,6 +1,6 @@
 {
   "name": "pressgang-ccms-rest-node",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "description": "Manages communication with a PressGang CCMS Server via its REST interface",
   "main": "index.js",
   "scripts": {
