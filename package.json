@@ -1,14 +1,14 @@
 {
-  "name": "pressgang-ccms-rest-node",
-  "version": "0.0.5",
-  "description": "Manages communication with a PressGang CCMS Server via its REST interface",
+  "name": "pressgang-rest",
+  "version": "0.0.1",
+  "description": "A high level library for REST communication with a PressGang Component Content Management System (CCMS) Server",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
     "type": "git",
-    "url": "git://github.com/jwulf/pressgang-ccms-rest-node.git"
+    "url": "git://github.com/jwulf/node-pressgang-rest.git"
   },
   "keywords": [
     "pressgang",
