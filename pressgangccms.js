@@ -1,6 +1,6 @@
 /*!
- * pressgang-ccms-rest-node
- * Copyright(c) 2012 Red Hat <jwulf@learnboost.com>
+ * pressgang-rest
+ * Copyright(c) 2012 Red Hat <jwulf@redhat.com>
  * BSD Licensed
  */
  
