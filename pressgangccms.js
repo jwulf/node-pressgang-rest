@@ -15,15 +15,21 @@ var constants = { contentSpecTagID: 268 }
 
 module.exports.PressGangCCMS = PressGangCCMS;
 
-function PressGangCCMS(url, options){
-    this.url = url || '';   
+function PressGangCCMS(options){
+
+	if ('string' == typeof options)
+		this.url = options;
+    if (options.url)
+        this.url = options.url;
+
     this.settings = {
         username: '',
         authmethod: '',
         authtoken: '',
-        restver: 1
+        restver: 1,
+		loglevel: 0
     }
- 
+
     if (options && options.key){
         for (var i in options) {
             if (options.hasOwnProperty(i)) {
@@ -64,7 +70,7 @@ PressGangCCMS.prototype.isContentSpec = function(topic_id, cb)
     });
 }
 
-PressGangCCMS.prototype.getTopicData = function(topic_id, data_request, cb)
+PressGangCCMS.prototype.getTopicData = function(data_request, topic_id, cb)
 {
     this.log(this.settings,2);
     if (this.url)
