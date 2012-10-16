@@ -55,7 +55,7 @@ PressGangCCMS.prototype.isContentSpec = function(topic_id, cb)
 {
     this.getTopicData(topic_id, 'topic-tags', function(err, result){ 
         var is_spec = false;
-        if (result.length > 0){
+        if (result && result.length > 0){
             for (var i = 0; i < result.length; i ++){
                 if (result[i].item.id == constants.contentSpecTagID) is_spec = true;
             }
