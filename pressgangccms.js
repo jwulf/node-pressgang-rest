@@ -4,7 +4,7 @@
  * BSD Licensed
  */
  
-// pressgang-ccms-rest-node is a module for communicating with a PressGang CCMS server
+// node-pressgang-rest is a node module for communicating with a PressGang CCMS server
 // via its REST interface
 
 var rest = require('restler');
