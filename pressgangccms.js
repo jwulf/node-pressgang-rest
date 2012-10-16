@@ -22,6 +22,7 @@ function PressGangCCMS(options){
     if (options.url)
         this.url = options.url;
 
+// Authentication is not implemented in PressGang yet
     this.settings = {
         username: '',
         authmethod: '',
