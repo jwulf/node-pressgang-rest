@@ -60,11 +60,14 @@ PressGangCCMS.prototype.set = function (key, value) {
 
 PressGangCCMS.prototype.isContentSpec = function(topic_id, cb)
 {
-    this.getTopicData(topic_id, 'topic-tags', function(err, result){ 
-        var is_spec = false;
-        if (result && result.length > 0){
-            for (var i = 0; i < result.length; i ++){
-                if (result[i].item.id == constants.contentSpecTagID) is_spec = true;
+    this.getTopicData('topic-tags', topic_id, function(err, result){ 
+        if (!err)
+        {
+            var is_spec = false;
+            if (result && result.length > 0){
+                for (var i = 0; i < result.length; i ++){
+                    if (result[i].item.id == constants.contentSpecTagID) is_spec = true;
+                }
             }
         }
         cb(err, is_spec);
@@ -130,4 +133,5 @@ PressGangCCMS.prototype.getTopicData = function(data_request, topic_id, cb)
         cb(new Error('No server URL specified'));
     }
 }
+
 
