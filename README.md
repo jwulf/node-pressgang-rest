@@ -1,18 +1,18 @@
-#pressgang-ccms-rest-node
+#node-pressgang-rest
 
 A node module that provides a REST client library for the PressGang CCMS. It provides a more semantic interface for application development than the raw PressGang REST interface. Uses restler for the REST interface.
 
 ##Installation
 
 ```bash
-npm install pressgang-ccms-rest-node
+npm install pressgang-rest
 ```
 ## Basic Usage
 
-First, require `pressgang-ccms-rest-node`:
+First, require `pressgang-rest`:
 
 ```js
-var PressGangCCMS = require('pressgang-ccms-rest-node').PressGangCCMS;
+var PressGangCCMS = require('pressgang-rest').PressGangCCMS;
 ```
 Next, create a new PressGangCCMS object:
 
