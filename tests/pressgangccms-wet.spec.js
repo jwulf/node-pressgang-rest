@@ -13,8 +13,10 @@
 var PG = require('./../pressgangccms.js');
 
 const   TEST_URL = process.env.PG_TEST_URL;
-        TEST_TOPIC_ID = 33;
-        TEST_TOPIC_REV = 140306;
+        TEST_TOPIC_ID = 12095;
+        TEST_TOPIC_TEXT = 'Test Topic Second Revision';
+        TEST_TOPIC_REV = 326032;
+        TEST_TOPIC_REV_TEXT = 'Test Topic First Revision';
         TEST_SPEC_ID = 8844;
         TEST_SPEC_REV = 10;
         
@@ -84,6 +86,13 @@ describe( 'getTopicData', function () {
             });
     });
 
+    it('should return the right object for a JSON request', function (done) {
+        testPG.getTopicData('json', TEST_TOPIC_ID, function ( err, result ) {
+            expect( result.id ).toEqual( TEST_TOPIC_ID );
+            done();
+            });
+    });
+
     it('should return an object with an XML property for a JSON request', function (done) {
         testPG.getTopicData('json', TEST_TOPIC_ID, function ( err, result ) {
             expect( result.xml ).toBeDefined;
@@ -98,11 +107,93 @@ describe( 'getTopicData', function () {
             });
     });
 
+    it('should return the right string for a JSON request', function (done) {
+        testPG.getTopicData('json', TEST_TOPIC_ID, function ( err, result ) {
+        expect( result.xml ).toEqual( TEST_TOPIC_TEXT );
+        done();
+            });
+    });
+
     it('should return a string for an XML request', function (done) {
         testPG.getTopicData('xml', TEST_TOPIC_ID, function ( err, result ) {
             expect( result ).toEqual( jasmine.any( String ) );
             done();
             });
     });
+    
+    it('should return the right string for an XML request', function (done) {
+        testPG.getTopicData('xml', TEST_TOPIC_ID, function ( err, result ) {
+        expect( result ).toEqual( TEST_TOPIC_TEXT );
+        done();
+            });
+    });
+    
+});
 
+
+describe( 'getTopicData with revision', function () {
+    
+    beforeEach( function() {
+        testPG = new PG.PressGangCCMS(TEST_URL);
+        nullPG = new PG.PressGangCCMS('/dev/null');
+    });
+    
+    it('should return an error with no URL', function (done) {
+        delete nullPG.url;
+        nullPG.getTopicData('json', TEST_TOPIC_ID, TEST_TOPIC_REV, function (err, result) {
+            expect( err ).not.toBe(null);    
+            done();
+        });
+        
+    });
+    
+    it('should return an object for a JSON request', function (done) {
+        testPG.getTopicData('json', TEST_TOPIC_ID, TEST_TOPIC_REV, function ( err, result ) {
+            expect( result ).toEqual( jasmine.any( Object ) );
+            done();
+            });
+    });
+
+    it('should return the right object for a JSON request', function (done) {
+        testPG.getTopicData('json', TEST_TOPIC_ID, TEST_TOPIC_REV, function ( err, result ) {
+            expect( result.id ).toEqual( TEST_TOPIC_ID );
+            done();
+            });
+    });
+
+    it('should return an object with an XML property for a JSON request', function (done) {
+        testPG.getTopicData('json', TEST_TOPIC_ID, TEST_TOPIC_REV, function ( err, result ) {
+            expect( result.xml ).toBeDefined;
+            done();
+            });
+    });
+
+    it('should return an object with an XML property of Type String for a JSON request', function (done) {
+        testPG.getTopicData('json', TEST_TOPIC_ID, TEST_TOPIC_REV, function ( err, result ) {
+            expect( result.xml ).toEqual( jasmine.any( String ) );
+            done();
+            });
+    });
+
+    it('should return the right string for a JSON request', function (done) {
+        testPG.getTopicData('json', TEST_TOPIC_ID, TEST_TOPIC_REV, function ( err, result ) {
+        expect( result.xml ).toEqual( TEST_TOPIC_REV_TEXT );
+        done();
+            });
+    });
+
+    it('should return a string for an XML request', function (done) {
+        testPG.getTopicData('xml', TEST_TOPIC_ID, TEST_TOPIC_REV, function ( err, result ) {
+            expect( result ).toEqual( jasmine.any( String ) );
+            done();
+            });
+    });
+    
+    it('should return the right string for an XML request', function (done) {
+        testPG.getTopicData('xml', TEST_TOPIC_ID, TEST_TOPIC_REV, function ( err, result ) {
+        expect( result ).toEqual( TEST_TOPIC_REV_TEXT );
+        done();
+            });
+    });
+    
 });

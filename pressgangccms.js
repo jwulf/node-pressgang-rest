@@ -138,7 +138,7 @@ PressGangCCMS.prototype.getTopicData = function( data_request, topic_id, rev, cb
                     case 'xml':
                     case 'json':
                         requestPath += '/topic/get/json/' + topic_id;
-                        if ( _rev ) request += '/r/' + _rev;
+                        if ( _rev ) requestPath += '/r/' + _rev;
                         break;
                 
                     // 'topic-tags': Return an expanded collection of tags
