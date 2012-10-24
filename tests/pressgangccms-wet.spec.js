@@ -32,10 +32,20 @@ describe( 'isContentSpec', function () {
         testPG = new PG.PressGangCCMS(TEST_URL);
     });
     
+    it('should return an error when called with a non-numeric Topic ID', 
+        function (done) { 
+            testPG.isContentSpec('something', function (err, result) { 
+                expect( err ).not.toEqual( null );
+                done (); 
+            })
+        }
+    );
+    
     it('should return true for an existing Content Spec', 
         function (done) { 
             testPG.isContentSpec(TEST_SPEC_ID, function (err, result) { 
                 expect(result).toBe(true); 
+                expect( err ).toEqual( null );
                 done (); 
             })
         }
@@ -45,6 +55,17 @@ describe( 'isContentSpec', function () {
         function (done) {
             testPG.isContentSpec( 0, function (err, result) {
                 expect(result).toBe(false);
+                expect( err ).toEqual( null );
+                done ();
+            });
+        }
+    );
+
+    it('should return false for an non-Content Spec topic',
+        function (done) {
+            testPG.isContentSpec( TEST_TOPIC_ID, function (err, result) {
+                expect(result).toBe(false);
+                expect( err ).toEqual( null );
                 done ();
             });
         }
@@ -53,7 +74,7 @@ describe( 'isContentSpec', function () {
     it('should return an error for a bogus URL',
         function (done) {
                 testPG.url = 'httX://+_a-non-existent-domain.com:777';
-                testPG.isContentSpec( 0, function (err, result) {
+                testPG.isContentSpec( TEST_TOPIC_ID , function (err, result) {
                     expect( err ).not.toBe(null);
                     done ();
                 });
@@ -73,15 +94,42 @@ describe( 'getTopicData', function () {
     it('should return an error with no URL', function (done) {
         delete nullPG.url;
         nullPG.getTopicData('json', TEST_TOPIC_ID, function (err, result) {
-            expect( err ).not.toBe(null);    
+            expect( err ).not.toBe (null );    
             done();
         });
         
     });
     
+    it('should return an error for a bogus URL',
+        function (done) {
+                testPG.url = 'httX://+_a-non-existent-domain.com:777';
+                testPG.getTopicData( 'json', TEST_TOPIC_ID, function (err, result) {
+                    expect( err ).not.toBe( null );
+                    done ();
+                });
+        }
+    );
+    
+    it('should return an error when called with unsupported operation', 
+        function (done) {        
+        testPG.getTopicData('jsonp', TEST_TOPIC_ID, function ( err, result ) {
+            expect( err ).toEqual( jasmine.any( String ) );
+            done();
+            });
+    });
+
+    it('should return an error when called with a non-numeric Topic ID', 
+        function (done) {        
+        testPG.getTopicData('json', 'something' , function ( err, result ) {
+            expect( err ).toEqual( jasmine.any( String ) );
+            done();
+            });
+    });
+
     it('should return an object for a JSON request', function (done) {
         testPG.getTopicData('json', TEST_TOPIC_ID, function ( err, result ) {
             expect( result ).toEqual( jasmine.any( Object ) );
+            expect( err ).toEqual( null );
             done();
             });
     });
@@ -89,6 +137,7 @@ describe( 'getTopicData', function () {
     it('should return the right object for a JSON request', function (done) {
         testPG.getTopicData('json', TEST_TOPIC_ID, function ( err, result ) {
             expect( result.id ).toEqual( TEST_TOPIC_ID );
+            expect( err ).toEqual( null );
             done();
             });
     });
@@ -96,6 +145,7 @@ describe( 'getTopicData', function () {
     it('should return an object with an XML property for a JSON request', function (done) {
         testPG.getTopicData('json', TEST_TOPIC_ID, function ( err, result ) {
             expect( result.xml ).toBeDefined;
+            expect( err ).toEqual( null );
             done();
             });
     });
@@ -103,6 +153,7 @@ describe( 'getTopicData', function () {
     it('should return an object with an XML property of Type String for a JSON request', function (done) {
         testPG.getTopicData('json', TEST_TOPIC_ID, function ( err, result ) {
             expect( result.xml ).toEqual( jasmine.any( String ) );
+            expect( err ).toEqual( null );
             done();
             });
     });
@@ -110,6 +161,7 @@ describe( 'getTopicData', function () {
     it('should return the right string for a JSON request', function (done) {
         testPG.getTopicData('json', TEST_TOPIC_ID, function ( err, result ) {
         expect( result.xml ).toEqual( TEST_TOPIC_TEXT );
+        expect( err ).toEqual( null );
         done();
             });
     });
@@ -117,6 +169,7 @@ describe( 'getTopicData', function () {
     it('should return a string for an XML request', function (done) {
         testPG.getTopicData('xml', TEST_TOPIC_ID, function ( err, result ) {
             expect( result ).toEqual( jasmine.any( String ) );
+            expect( err ).toEqual( null );
             done();
             });
     });
@@ -124,6 +177,7 @@ describe( 'getTopicData', function () {
     it('should return the right string for an XML request', function (done) {
         testPG.getTopicData('xml', TEST_TOPIC_ID, function ( err, result ) {
         expect( result ).toEqual( TEST_TOPIC_TEXT );
+        expect( err ).toEqual( null );
         done();
             });
     });
@@ -146,10 +200,45 @@ describe( 'getTopicData with revision', function () {
         });
         
     });
+   
+    it('should return an error for a bogus URL',
+        function (done) {
+                testPG.url = 'httX://+_a-non-existent-domain.com:777';
+                testPG.getTopicData( TEST_TOPIC_ID, TEST_TOPIC_REV, function (err, result) {
+                    expect( err ).not.toBe(null);
+                    done ();
+                });
+        }
+    );
+
+    it('should return an error when called with unsupported operation', 
+        function (done) {        
+        testPG.getTopicData('jsonp', TEST_TOPIC_ID, TEST_TOPIC_REV, function ( err, result ) {
+            expect( err ).toEqual( jasmine.any( String ) );
+            done();
+            });
+    });
+
+    it('should return an error when called with a non-numeric Topic ID', 
+        function (done) {        
+        testPG.getTopicData('json', 'something' , TEST_TOPIC_REV, function ( err, result ) {
+            expect( err ).toEqual( jasmine.any( String ) );
+            done();
+            });
+    });
+
+    it('should return an error when called with a non-numeric Topic Revision', 
+        function (done) {        
+        testPG.getTopicData('json', TEST_TOPIC_ID, 'something', function ( err, result ) {
+            expect( err ).not.toBe( null );
+            done();
+            });
+    });
     
     it('should return an object for a JSON request', function (done) {
         testPG.getTopicData('json', TEST_TOPIC_ID, TEST_TOPIC_REV, function ( err, result ) {
             expect( result ).toEqual( jasmine.any( Object ) );
+            expect( err ).toEqual( null );
             done();
             });
     });
@@ -157,6 +246,7 @@ describe( 'getTopicData with revision', function () {
     it('should return the right object for a JSON request', function (done) {
         testPG.getTopicData('json', TEST_TOPIC_ID, TEST_TOPIC_REV, function ( err, result ) {
             expect( result.id ).toEqual( TEST_TOPIC_ID );
+            expect( err ).toEqual( null );
             done();
             });
     });
@@ -164,6 +254,7 @@ describe( 'getTopicData with revision', function () {
     it('should return an object with an XML property for a JSON request', function (done) {
         testPG.getTopicData('json', TEST_TOPIC_ID, TEST_TOPIC_REV, function ( err, result ) {
             expect( result.xml ).toBeDefined;
+            expect( err ).toEqual( null );
             done();
             });
     });
@@ -171,6 +262,7 @@ describe( 'getTopicData with revision', function () {
     it('should return an object with an XML property of Type String for a JSON request', function (done) {
         testPG.getTopicData('json', TEST_TOPIC_ID, TEST_TOPIC_REV, function ( err, result ) {
             expect( result.xml ).toEqual( jasmine.any( String ) );
+            expect( err ).toEqual( null );
             done();
             });
     });
@@ -178,6 +270,7 @@ describe( 'getTopicData with revision', function () {
     it('should return the right string for a JSON request', function (done) {
         testPG.getTopicData('json', TEST_TOPIC_ID, TEST_TOPIC_REV, function ( err, result ) {
         expect( result.xml ).toEqual( TEST_TOPIC_REV_TEXT );
+        expect( err ).toEqual( null );
         done();
             });
     });
@@ -185,6 +278,7 @@ describe( 'getTopicData with revision', function () {
     it('should return a string for an XML request', function (done) {
         testPG.getTopicData('xml', TEST_TOPIC_ID, TEST_TOPIC_REV, function ( err, result ) {
             expect( result ).toEqual( jasmine.any( String ) );
+            expect( err ).toEqual( null );
             done();
             });
     });
@@ -192,8 +286,13 @@ describe( 'getTopicData with revision', function () {
     it('should return the right string for an XML request', function (done) {
         testPG.getTopicData('xml', TEST_TOPIC_ID, TEST_TOPIC_REV, function ( err, result ) {
         expect( result ).toEqual( TEST_TOPIC_REV_TEXT );
+        expect( err ).toEqual( null );
         done();
             });
     });
     
 });
+
+
+// TODO: Test getTopicData for topic-tags
+

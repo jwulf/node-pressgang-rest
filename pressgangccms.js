@@ -68,8 +68,14 @@ PressGangCCMS.prototype.log = function( msg, lvl ) {
 
 PressGangCCMS.prototype.isContentSpec = function(topic_id, cb)
 {
+    
+    if ( typeof cb !== 'function' ) return;
+    
+    if ( typeof topic_id !== 'number' ) 
+        return cb ( 'Need numeric Topic ID as first argument' );
+    
     this.getTopicData('topic-tags', topic_id, function isContentSpecGetTagsCallback(err, result){ 
-        if (!err)
+        if ( !err )
         {
             var is_spec = false;
             if (result && result.length > 0){
@@ -78,7 +84,7 @@ PressGangCCMS.prototype.isContentSpec = function(topic_id, cb)
                 }
             }
         }
-        return cb(err, is_spec);
+        return cb( err, is_spec );
     });
 }
 
@@ -98,18 +104,37 @@ PressGangCCMS.prototype.getTopicXML = function(topic_id, rev, cb)
 // Result is 
 PressGangCCMS.prototype.getTopicData = function( data_request, topic_id, rev, cb )
 {
+    const SUPPORTED_OPS = { 
+            'xml' : 1,
+            'topic-tags' : 1,
+            'json' : 1 
+            };
+            
     var requestPath, _rev, _restver, _result;
-    
+
+    if ( 'function' == typeof cb ) 
+        if ( 'number' !== typeof rev )
+            if ( cb ) cb ('Need numerical topic revision as third argument');
+                // If there is no callback we'll return shortly anyway...
+        
     // The revision argument is optional, so if it was elided
     // and a callback function was specified, assign the callback 
     // argument to cb
     if ( 'function' == typeof rev )
         cb = rev;
-        
+    
+    // No callback, no way to return the data - not doing anything!
+    if ( ! cb ) return;
+    
+    if ( ! SUPPORTED_OPS[data_request] ) return cb('Unsupported operation ' + data_request + ' passed as first argument');
+    
+    if ( 'number' !== typeof topic_id ) return cb('Need numerical Topic ID as second argument');
+    
     if ( this.url )
     {    
         // If an optional revision number was specified, assign it to the 
         // internal revision property
+        // This means that a non-number passed as a revision is silently ignored
         if ( 'number' == typeof rev )
             _rev = rev;
 
@@ -143,7 +168,9 @@ PressGangCCMS.prototype.getTopicData = function( data_request, topic_id, rev, cb
                 
                     // 'topic-tags': Return an expanded collection of tags
                     case 'topic-tags':
-                        requestPath += '/topic/get/json/' + topic_id + '?expand='
+                        requestPath += '/topic/get/json/' + topic_id;
+                        if ( _rev ) requestPath += '/r/' + _rev;
+                        requestPath += '?expand='
                         requestPath += encodeURIComponent('{"branches":[{"trunk":{"name":"tags"}}]}'); 
                         break;
             }
@@ -157,13 +184,13 @@ PressGangCCMS.prototype.getTopicData = function( data_request, topic_id, rev, cb
         this.log(this.url + requestPath, 2);
         
         rest.get(this.url + requestPath).on('complete', function(result){
-            if (result instanceof Error)
+            if ( result instanceof Error )
             {
-                if ('function' == typeof cb) return cb(result);
+                if ( 'function' == typeof cb ) return cb( result );
             }
             else
             {
-                if (!result) return cb('Unable to contact server');
+                if ( ! result ) return cb( 'Unable to contact server' );
             }
             
             // By default we return the entire result
@@ -186,12 +213,12 @@ PressGangCCMS.prototype.getTopicData = function( data_request, topic_id, rev, cb
                     break;
             }
         
-            return cb(null, _result);
+            if ( cb ) return cb( null, _result );
         });
     }
     else
     {
-        if (cb) return cb(new Error('No server URL specified'));
+        if ( cb ) return cb(new Error('No server URL specified'));
     }
 }
 
