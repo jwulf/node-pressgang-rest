@@ -51,5 +51,5 @@ pressgang.isContentSpec(456,
 You can change the logging level of the PressGangCCMS Object to get details for debugging. The `loglevel` defaults to 0. Higher levels produce more trace output on the console:
 
 ```js
-pressgang.set('loglevel', 2);
+pressgang.loglevel = 2;
 ```
