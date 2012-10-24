@@ -39,6 +39,16 @@ pressgang.getTopicData('json', 8445,
 	});
 ```
 
+To get a specific revision of a topic:
+
+```js
+pressgang.getTopicData('json', 8445, 10405, 
+    function(err, result){
+		console.log('The XML of revision 10405 is:' 
+		+ result.xml;
+	});
+```
+
 `isContentSpec` is an example of a more semantic interface to PressGang:
 
 ```js
