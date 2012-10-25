@@ -1,10 +1,10 @@
 {
   "name": "pressgang-rest",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "description": "A high level library for REST communication with a PressGang Component Content Management System (CCMS) Server",
   "main": "index.js",
   "scripts": {
-    "test": "jasmine-node tests/"
+    "test": "jasmine-node tests/dry-tests.spec.js"
   },
   "repository": {
     "type": "git",
@@ -17,7 +17,7 @@
   "author": "Joshua Wulf",
   "license": "BSD",
   "dependencies": {
-    "restler": "~2.0.1",
+    "restler": "~2.0.1"
   },
   "directories": {
     "doc": ".",
