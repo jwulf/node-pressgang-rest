@@ -63,3 +63,8 @@ You can change the logging level of the PressGangCCMS Object to get details for 
 ```js
 pressgang.loglevel = 2;
 ```
+
+##Source Code
+The source is hosted on github at https://github.com/jwulf/node-pressgang-rest.
+
+It's written using Microsoft TypeScript, and compiled to JavaScript using the node typescript module. There is a TypeScript declaration file in the module.
