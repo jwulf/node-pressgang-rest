@@ -23,6 +23,7 @@ import util = module('util');
 export var DEFAULT_URL = 'http://127.0.0.1:8080/TopicIndex';
 export var CONTENT_SPEC_TAG_ID = 268; // PressGang tag ID for Content Spec tag
 export var REST_API_PATH = '/seam/resource/rest/'; 
+export var REST_UPDATE_TOPIC_PATH = 'topic/update/json';
 export var DEFAULT_REST_VER = 1;
 export var DEFAULT_LOG_LEVEL = 0;
 export var DEFAULT_AUTH_METHOD = ''; // xx AUTH not implemented yet
@@ -144,6 +145,7 @@ export class PressGangCCMS implements IPressGang {
 
         _is_spec = false;
 
+        // Since we can only inform via a callback, exit if we don't have one
         if ( typeof cb !== 'function' ) return;
         
         if ( typeof topic_id !== 'number' ) 
@@ -176,8 +178,7 @@ export class PressGangCCMS implements IPressGang {
                 cb?: (err: string, result: any) => any) : any
     {
                 
-        var requestPath :string,
-            _rev: number, 
+        var _rev: number, 
             _restver: number,
             _result: any;
     
@@ -222,63 +223,56 @@ export class PressGangCCMS implements IPressGang {
         // assemble the request path from the url, data_request, topic id
         // and (optionally) the revision number
         
-        // Start with the base REST API path from the constants
-        requestPath = REST_API_PATH;
+        this.getBaseRESTPath( (requestPath) => {
         
-        // Currently only v 1 of the API exists, and the path is constructed
-        // by adding the version number. In future revisions the API calls themselves 
-        // might change, so we will switch on the restver
-        // For now we can just add the restver to the path
-        _restver = this.restver || DEFAULT_REST_VER;
-        requestPath += _restver;
-        
-        switch(data_request){ // These are the different data requests we support
-        
-            // 'xml': Return the topic xml (plain text in the case of a Content Spec
-            // 'json-topic': Return the json representation of a topic
-            case DATA_REQ.xml:
-            case DATA_REQ.json:
-                requestPath += '/topic/get/json/' + topic_id;
-                if ( _rev ) requestPath += '/r/' + _rev;
-                break;
-        
-            // 'topic-tags': Return an expanded collection of tags
-            case DATA_REQ.topic_tags:
-                requestPath += '/topic/get/json/' + topic_id;
-                if ( _rev ) requestPath += '/r/' + _rev;
-                requestPath += '?expand='
-                requestPath += encodeURIComponent('{"branches":[{"trunk":{"name":"tags"}}]}'); 
-                break;
-        }
-                        
-        this.log(this.url + requestPath, 2);
-    
-
-        restler.get(this.url + requestPath).on('complete', (result) => {
+            switch(data_request){ // These are the different data requests we support
             
-            if ( result instanceof Error )
-                return cb( 'REST err: '+ result, null );
-
-            if ( ! result ) return cb( 'Could not get data from server', null );
-            
-            // By default we return the entire result
-            _result = result;
-            
-            switch(data_request){
-                case DATA_REQ.topic_tags:
-                    if (!result.tags) { 
-                        _result =[]; 
-                    } else { 
-                        _result = result.tags.items; 
-                    }
-                    break;
-                    
+                // 'xml': Return the topic xml (plain text in the case of a Content Spec
+                // 'json-topic': Return the json representation of a topic
                 case DATA_REQ.xml:
-                    _result = result.xml;
+                case DATA_REQ.json:
+                    requestPath += '/topic/get/json/' + topic_id;
+                    if ( _rev ) requestPath += '/r/' + _rev;
+                    break;
+            
+                // 'topic-tags': Return an expanded collection of tags
+                case DATA_REQ.topic_tags:
+                    requestPath += '/topic/get/json/' + topic_id;
+                    if ( _rev ) requestPath += '/r/' + _rev;
+                    requestPath += '?expand='
+                    requestPath += encodeURIComponent('{"branches":[{"trunk":{"name":"tags"}}]}'); 
                     break;
             }
+                            
+            this.log(this.url + requestPath, 2);
         
-            if ( cb ) return cb( null, _result );
+    
+            restler.get(this.url + requestPath).on('complete', (result) => {
+                
+                if ( result instanceof Error )
+                    return cb( 'REST err: '+ result, null );
+    
+                if ( ! result ) return cb( 'Could not get data from server', null );
+                
+                // By default we return the entire result
+                _result = result;
+                
+                switch(data_request){
+                    case DATA_REQ.topic_tags:
+                        if (!result.tags) { 
+                            _result =[]; 
+                        } else { 
+                            _result = result.tags.items; 
+                        }
+                        break;
+                        
+                    case DATA_REQ.xml:
+                        _result = result.xml;
+                        break;
+                }
+            
+                if ( cb ) return cb( null, _result );
+            });
         });
     }    
 
@@ -352,7 +346,41 @@ export class PressGangCCMS implements IPressGang {
         cb( err, _result );
     }
 
-    saveTopic( topic: ITopic, cb: ( err, result )=>any ): any
+    getBaseRESTPath( cb: (RequestPath: string) => any ): any {
+
+       var requestPath: string,
+            _restver: number;
+        
+        // Start with the base REST API path from the constants
+        requestPath = REST_API_PATH;
+        
+        // Currently only v 1 of the API exists, and the path is constructed
+        // by adding the version number. In future revisions the API calls themselves 
+        // might change, so we will switch on the restver
+        // For now we can just add the restver to the path
+        _restver = this.restver || DEFAULT_REST_VER;
+        requestPath += _restver; 
+    
+        return cb( requestPath );
+    }
+
+    saveTopic( topic: ITopic, log_msg: string, change_impact: number, cb: ( err, result )=>any ): any
     {
+        var CHANGE = {
+                        MINOR :1, 
+                        MAJOR : 2
+                        };
+
+    //  so /rest/1/topic/update/json?message=blah&flag=1
+    //  <lnewson> 1 = minor, 2 = major
+
+        this.getBaseRESTPath( (requestPath) => {
+            requestPath += REST_UPDATE_TOPIC_PATH;
+            requestPath += '?message=';
+            requestPath += encodeURIComponent(log_msg);
+            requestPath += '&flag=';
+            requestPath += '' + change_impact;
+            
+        });
     }
 }

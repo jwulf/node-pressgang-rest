@@ -3,6 +3,7 @@ var restler = require("restler")
 exports.DEFAULT_URL = 'http://127.0.0.1:8080/TopicIndex';
 exports.CONTENT_SPEC_TAG_ID = 268;
 exports.REST_API_PATH = '/seam/resource/rest/';
+exports.REST_UPDATE_TOPIC_PATH = 'topic/update/json';
 exports.DEFAULT_REST_VER = 1;
 exports.DEFAULT_LOG_LEVEL = 0;
 exports.DEFAULT_AUTH_METHOD = '';
@@ -174,7 +175,7 @@ var PressGangCCMS = (function () {
         this.getTopicData('xml', topic_id, rev, cb);
     };
     PressGangCCMS.prototype.getTopicData = function (data_request, topic_id, revORcb, cb) {
-        var requestPath;
+        var _this = this;
         var _rev;
         var _restver;
         var _result;
@@ -204,58 +205,57 @@ var PressGangCCMS = (function () {
         if(('number' == typeof revORcb) && (-1 !== revORcb)) {
             _rev = revORcb;
         }
-        requestPath = exports.REST_API_PATH;
-        _restver = this.restver || exports.DEFAULT_REST_VER;
-        requestPath += _restver;
-        switch(data_request) {
-            case exports.DATA_REQ.xml:
-            case exports.DATA_REQ.json: {
-                requestPath += '/topic/get/json/' + topic_id;
-                if(_rev) {
-                    requestPath += '/r/' + _rev;
-                }
-                break;
-
-            }
-            case exports.DATA_REQ.topic_tags: {
-                requestPath += '/topic/get/json/' + topic_id;
-                if(_rev) {
-                    requestPath += '/r/' + _rev;
-                }
-                requestPath += '?expand=';
-                requestPath += encodeURIComponent('{"branches":[{"trunk":{"name":"tags"}}]}');
-                break;
-
-            }
-        }
-        this.log(this.url + requestPath, 2);
-        restler.get(this.url + requestPath).on('complete', function (result) {
-            if(result instanceof Error) {
-                return cb('REST err: ' + result, null);
-            }
-            if(!result) {
-                return cb('Could not get data from server', null);
-            }
-            _result = result;
+        this.getBaseRESTPath(function (requestPath) {
             switch(data_request) {
-                case exports.DATA_REQ.topic_tags: {
-                    if(!result.tags) {
-                        _result = [];
-                    } else {
-                        _result = result.tags.items;
+                case exports.DATA_REQ.xml:
+                case exports.DATA_REQ.json: {
+                    requestPath += '/topic/get/json/' + topic_id;
+                    if(_rev) {
+                        requestPath += '/r/' + _rev;
                     }
                     break;
 
                 }
-                case exports.DATA_REQ.xml: {
-                    _result = result.xml;
+                case exports.DATA_REQ.topic_tags: {
+                    requestPath += '/topic/get/json/' + topic_id;
+                    if(_rev) {
+                        requestPath += '/r/' + _rev;
+                    }
+                    requestPath += '?expand=';
+                    requestPath += encodeURIComponent('{"branches":[{"trunk":{"name":"tags"}}]}');
                     break;
 
                 }
             }
-            if(cb) {
-                return cb(null, _result);
-            }
+            _this.log(_this.url + requestPath, 2);
+            restler.get(_this.url + requestPath).on('complete', function (result) {
+                if(result instanceof Error) {
+                    return cb('REST err: ' + result, null);
+                }
+                if(!result) {
+                    return cb('Could not get data from server', null);
+                }
+                _result = result;
+                switch(data_request) {
+                    case exports.DATA_REQ.topic_tags: {
+                        if(!result.tags) {
+                            _result = [];
+                        } else {
+                            _result = result.tags.items;
+                        }
+                        break;
+
+                    }
+                    case exports.DATA_REQ.xml: {
+                        _result = result.xml;
+                        break;
+
+                    }
+                }
+                if(cb) {
+                    return cb(null, _result);
+                }
+            });
         });
     };
     PressGangCCMS.prototype.getSpec = function (spec_id, revORcb, cb) {
@@ -317,7 +317,27 @@ var PressGangCCMS = (function () {
         }
         cb(err, _result);
     };
-    PressGangCCMS.prototype.saveTopic = function (topic, cb) {
+    PressGangCCMS.prototype.getBaseRESTPath = function (cb) {
+        var requestPath;
+        var _restver;
+
+        requestPath = exports.REST_API_PATH;
+        _restver = this.restver || exports.DEFAULT_REST_VER;
+        requestPath += _restver;
+        return cb(requestPath);
+    };
+    PressGangCCMS.prototype.saveTopic = function (topic, log_msg, change_impact, cb) {
+        var CHANGE = {
+            MINOR: 1,
+            MAJOR: 2
+        };
+        this.getBaseRESTPath(function (requestPath) {
+            requestPath += exports.REST_UPDATE_TOPIC_PATH;
+            requestPath += '?message=';
+            requestPath += encodeURIComponent(log_msg);
+            requestPath += '&flag=';
+            requestPath += '' + change_impact;
+        });
     };
     return PressGangCCMS;
 })();

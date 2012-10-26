@@ -3,6 +3,7 @@ import util = module ('util');
 export var DEFAULT_URL: string;
 export var CONTENT_SPEC_TAG_ID: number;
 export var REST_API_PATH: string;
+export var REST_UPDATE_TOPIC_PATH: string;
 export var DEFAULT_REST_VER: number;
 export var DEFAULT_LOG_LEVEL: number;
 export var DEFAULT_AUTH_METHOD: string;
@@ -43,5 +44,6 @@ export class PressGangCCMS implements IPressGang {
     public getSpec(spec_id: number, cb: (err: string,result: any) => any);
     public getSpec(spec_id: number, rev: number, cb: (err: string,result: any) => any);
     public stripMetadata(spec: string, cb: (err: string,result: IContentSpec) => any): any;
-    public saveTopic(topic: ITopic, cb: (err: any,result: any) => any): any;
+    public getBaseRESTPath(cb: (RequestPath: string) => any): any;
+    public saveTopic(topic: ITopic, log_msg: string, change_impact: number, cb: (err: any,result: any) => any): any;
 }
