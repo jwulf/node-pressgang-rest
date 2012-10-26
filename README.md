@@ -49,13 +49,22 @@ pressgang.getTopicData('json', 8445, 10405,
 	});
 ```
 
-`isContentSpec` is an example of a more semantic interface to PressGang:
+`isContentSpec` will return true if an ID is a Content Specification:
 
 ```js
 pressgang.isContentSpec(456, 
 	function(err, is){
 		if (is) console.log('Topic 456 is a Content Specification')
-	});
+	});    
+```
+
+`getContentSpec` returns a Content Spec object, which has the plain text content of the Content Spec, and a metadata record.
+```js
+pressgang.getContentSpec(456, 
+    function(err, result){
+		console.log(result.spec); // Plain-text of the spec
+        console.log(result.metadata); // All the spec metadata in an object
+	});    
 ```
 
 You can change the logging level of the PressGangCCMS Object to get details for debugging. The `loglevel` defaults to 0. Higher levels produce more trace output on the console:
