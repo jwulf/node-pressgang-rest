@@ -9,9 +9,10 @@
 // then run
 // jasmine-node pressgangccms.spec.js --verbose
 
-var PG = require('./../pressgangccms.js');
+// Tests the compiled js at the top level by default
+var src = process.env.SRCDIR || './../pressgangccms.js';
 
-// var testURL = process.env.PG_TEST_URL || 'http://127.0.0.1';
+var PG = require(src);
 
 const   TEST_URL = 'http://pg.funkymonkey.io:8080/TopicIndex/',
         TEST_OPTS_NO_URL = { 

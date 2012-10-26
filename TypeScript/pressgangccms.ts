@@ -37,9 +37,9 @@ export interface IPressGang {
 }
 
 export interface IContentSpec {
-    id: number;
-    spec: string;
-    metadata: any;
+    id?: number;
+    spec?: string;
+    metadata?: any;
 }
 
 export interface ITopic{
@@ -92,6 +92,8 @@ export class PressGangCCMS implements IPressGang {
     public restver: number;
     public loglevel: number; 
 
+    private self: PressGangCCMS;
+
 // Object constructor
 // optionally takes string or configuration object as argument
 
@@ -99,6 +101,8 @@ export class PressGangCCMS implements IPressGang {
     constructor ( settings: IPressGang );
     constructor ( settings: any)
     {
+
+        this.setSelf();
 
         // Set default URL
         this.url = DEFAULT_URL;
@@ -122,6 +126,10 @@ export class PressGangCCMS implements IPressGang {
         }
     }
 
+    private setSelf(){
+        this.self = this;
+    }
+
     public supportedDataRequests ():any { return DATA_REQ }
 
     private log (msg:string, msglevel: number): void
@@ -141,7 +149,7 @@ export class PressGangCCMS implements IPressGang {
         if ( typeof topic_id !== 'number' ) 
             return cb ( 'Need numeric Topic ID as first argument', false );
         
-        this.getTopicData('topic_tags', topic_id, function isContentSpecGetTagsCallback(err, result){ 
+        this.getTopicData('topic_tags', topic_id, (err, result) => { 
             
             if ( err ) return cb( err, null );
             
@@ -208,7 +216,7 @@ export class PressGangCCMS implements IPressGang {
         // If an optional revision number was specified, assign it to the 
         // internal revision property
         // This means that a non-number passed as a revision is silently ignored
-        if ( 'number' == typeof revORcb && -1 !== revORcb) // -1 means no revision
+        if ( ('number' == typeof revORcb) && (-1 !== revORcb)) // -1 means no revision
             _rev = revORcb;
 
         // assemble the request path from the url, data_request, topic id
@@ -246,10 +254,10 @@ export class PressGangCCMS implements IPressGang {
         this.log(this.url + requestPath, 2);
     
 
-        restler.get(this.url + requestPath).on('complete', function(result){
+        restler.get(this.url + requestPath).on('complete', (result) => {
             
             if ( result instanceof Error )
-                return cb( 'Error getting topic via REST: '+ result, null );
+                return cb( 'REST err: '+ result, null );
 
             if ( ! result ) return cb( 'Could not get data from server', null );
             
@@ -291,15 +299,15 @@ export class PressGangCCMS implements IPressGang {
 
         if ('number' !== typeof spec_id ) cb ( 'Numeric Spec ID needed as first argument', null);
 
-        this.isContentSpec( spec_id,  function getSpecIsSpecCallback ( err, is ){
+        this.isContentSpec( spec_id, ( err, is ) => {
 
             if ( err ) return cb( err, null );
 
             if ( !is )
                 return cb( 'Requested ID is not a Content Specification', null);
 
-            this.getTopicData(DATA_REQ.xml, _rev, spec_id, 
-                function getSpecRevGetTopicDataCallback( err, result )
+            this.getTopicData(DATA_REQ.xml, spec_id, _rev,  
+                ( err, result ) =>
                 { 
                     if ( err ) return cb( err, result );
                     this.stripMetadata( result, 
@@ -322,6 +330,7 @@ export class PressGangCCMS implements IPressGang {
         if ( 'string' !== typeof spec || '' === spec ) 
             return cb ( 'Cannot parse spec - expected string value', null ); 
 
+        _result = {};
         _result.spec = spec;
         _result.metadata = {'serverurl': this.url};   
         
