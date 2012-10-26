@@ -16,17 +16,9 @@
 // via its REST interface
 
 //declare var rest; 
-
 import restler = module("restler");
+import util = module('util');
 
-interface IPressGang {
-        url?: string;
-        username?: string;   
-        authtoken?: string;
-        authmethod?: string;
-        restver?: number;
-        loglevel?: number;
-}
 
 export var DEFAULT_URL = 'http://127.0.0.1:8080/TopicIndex';
 export var CONTENT_SPEC_TAG_ID = 268; // PressGang tag ID for Content Spec tag
@@ -35,20 +27,70 @@ export var DEFAULT_REST_VER = 1;
 export var DEFAULT_LOG_LEVEL = 0;
 export var DEFAULT_AUTH_METHOD = ''; // xx AUTH not implemented yet
 
+export interface IPressGang {
+        url?: string;
+        username?: string;   
+        authtoken?: string;
+        authmethod?: string;
+        restver?: number;
+        loglevel?: number;
+}
+
+export interface IContentSpec {
+    id: number;
+    spec: string;
+    metadata: any;
+}
+
+export interface ITopic{
+
+}
+
 // Supported operations for getTopicData
 export var DATA_REQ = {
-                'xml' :'xml',
-                'topic_tags' : 'topic_tags',
-                'json' : 'json' 
+                xml :'xml',
+                topic_tags : 'topic_tags',
+                json : 'json' 
                 };
 
-export class PressGangCCMS implements IPressGang{
+export var ContentSpecMetadataSchema = [
+    {attr : 'specrevision', rule : /^SPECREVISION[ ]*((=.*)|$)/i},
+    {attr : 'product',      rule : /^PRODUCT[ ]*((=.*)|$)/i},
+    {attr : 'checksum',     rule : /^CHECKSUM[ ]*((=.*)|$)/i},
+    {attr : 'subtitle',     rule : /^SUBTITLE[ ]*((=.*)|$)/i},
+    {attr : 'title',        rule : /^TITLE[ ]*((=.*)|$)/i},
+    {attr : 'edition',      rule : /^EDITION[ ]*((=.*)|$)/i},
+    {attr : 'bookversion',  rule : /^BOOK VERSION[ ]*((=.*)|$)/i},
+    {attr : 'pubsnumber',   rule : /^PUBSNUMBER[ ]*((=.*)|$)/i},
+    {attr : 'description',  rule : /^(DESCRIPTION|ABSTRACT)[ ]*((=.*)|$)/i},
+    {attr : 'copyright',    rule : /^COPYRIGHT HOLDER[ ]*((=.*)|$)/i},
+    {attr : 'debug',        rule : /^DEBUG[ ]*((=.*)|$)/i},
+    {attr : 'version',      rule : /^VERSION[ ]*((=.*)|$)/i},
+    {attr : 'brand',        rule : /^BRAND[ ]*((=.*)|$)/i},
+    {attr : 'buglinks',     rule : /^BUG[ ]*LINKS[ ]*((=.*)|$)/i},
+    {attr : 'bzproduct',    rule : /^BZPRODUCT[ ]*((=.*)|$)/i},
+    {attr : 'bzcomponent',  rule : /^BZCOMPONENT[ ]*((=.*)|$)/i},
+    {attr : 'bzversion',    rule : /^BZVERSION[ ]*((=.*)|$)/i},
+    {attr : 'surveylinks',  rule : /^SURVEY[ ]*LINKS[ ]*((=.*)|$)/i},
+    {attr : 'translocale',  rule : /^TRANSLATION LOCALE[ ]*((=.*)|$)/i},
+    {attr : 'type',         rule : /^TYPE[ ]*((=.*)|$)/i},
+    {attr : 'outputstyle',  rule : /^OUTPUT STYLE[ ]*((=.*)|$)/i},
+    {attr : 'publican.cfg', rule : /^PUBLICAN\\.CFG[ ]*((=.*)|$)/i},
+    {attr : 'inlineinject', rule : /^INLINE INJECTION[ ]*((=.*)|$)/i},
+    {attr : 'space',        rule : /^spaces[ ]*((=.*)|$)/i},
+    {attr : 'dtd',          rule : /^DTD[ ]*((=.*)|$)/i},
+    {attr : 'id',           rule : /^ID[ ]*((=.*)|$)/i},
+//  {attr: 'bookdir',       rule : injected}     
+//  {attr: 'serverurl',     rule : injected}
+]
+
+export class PressGangCCMS implements IPressGang {
     public url: string;
     public username: string;   
     public authtoken: string;
     public authmethod: string;
     public restver: number;
-    public loglevel: number;               
+    public loglevel: number; 
 
 // Object constructor
 // optionally takes string or configuration object as argument
@@ -57,6 +99,7 @@ export class PressGangCCMS implements IPressGang{
     constructor ( settings: IPressGang );
     constructor ( settings: any)
     {
+
         // Set default URL
         this.url = DEFAULT_URL;
             
@@ -89,24 +132,25 @@ export class PressGangCCMS implements IPressGang{
 
     public isContentSpec (topic_id: number, cb: (err: string, result:bool) => bool): any
     {
-        
+        var _is_spec: bool;
+
+        _is_spec = false;
+
         if ( typeof cb !== 'function' ) return;
         
         if ( typeof topic_id !== 'number' ) 
             return cb ( 'Need numeric Topic ID as first argument', false );
         
         this.getTopicData('topic_tags', topic_id, function isContentSpecGetTagsCallback(err, result){ 
-            if ( !err )
-            {
-                var is_spec = false;
-                if (result && result.length > 0){
-                    for (var i = 0; i < result.length; i ++){
-                        if (result[i].item.id === CONTENT_SPEC_TAG_ID) is_spec = true;
-                    }
+            
+            if ( err ) return cb( err, null );
+            
+            if (result && result.length > 0){
+                for (var i = 0; i < result.length; i ++){
+                    if (result[i].item.id && result[i].item.id === CONTENT_SPEC_TAG_ID) _is_spec = true;
                 }
             }
-            cb( err, is_spec );
-            return;
+            return cb( err, _is_spec );
         });
     }
 
@@ -164,7 +208,7 @@ export class PressGangCCMS implements IPressGang{
         // If an optional revision number was specified, assign it to the 
         // internal revision property
         // This means that a non-number passed as a revision is silently ignored
-        if ( 'number' == typeof revORcb )
+        if ( 'number' == typeof revORcb && -1 !== revORcb) // -1 means no revision
             _rev = revORcb;
 
         // assemble the request path from the url, data_request, topic id
@@ -200,16 +244,14 @@ export class PressGangCCMS implements IPressGang{
         }
                         
         this.log(this.url + requestPath, 2);
-        
+    
+
         restler.get(this.url + requestPath).on('complete', function(result){
+            
             if ( result instanceof Error )
-            {
-                if ( 'function' == typeof cb ) return cb( result, null );
-            }
-            else
-            {
-                if ( ! result ) return cb( 'Unable to contact server', null );
-            }
+                return cb( 'Error getting topic via REST: '+ result, null );
+
+            if ( ! result ) return cb( 'Could not get data from server', null );
             
             // By default we return the entire result
             _result = result;
@@ -230,6 +272,78 @@ export class PressGangCCMS implements IPressGang{
         
             if ( cb ) return cb( null, _result );
         });
-    }
+    }    
+
+    getSpec(spec_id: number, cb: (err: string, result) => any);
+    getSpec(spec_id: number, rev: number, cb: (err : string, result) => any);
+    getSpec(spec_id: number, revORcb: any, cb?: (err: string, result) => any) :void 
+    {
+        var _rev: number;
+
+        _rev = -1; // means no revision
     
+        if ( 'function' == typeof revORcb) cb = revORcb;
+
+        if ( 'number' == typeof revORcb ) _rev = revORcb;
+
+        // No callback, nothing to do
+        if ('function' !== typeof cb) return;
+
+        if ('number' !== typeof spec_id ) cb ( 'Numeric Spec ID needed as first argument', null);
+
+        this.isContentSpec( spec_id,  function getSpecIsSpecCallback ( err, is ){
+
+            if ( err ) return cb( err, null );
+
+            if ( !is )
+                return cb( 'Requested ID is not a Content Specification', null);
+
+            this.getTopicData(DATA_REQ.xml, _rev, spec_id, 
+                function getSpecRevGetTopicDataCallback( err, result )
+                { 
+                    if ( err ) return cb( err, result );
+                    this.stripMetadata( result, 
+                        function getSpecRevStripMetadataCall( err: string, result: IContentSpec ){
+                            return cb( err, result ); 
+                        });
+                } 
+            );
+	    }); 
+    }
+
+    stripMetadata( spec: string, cb: ( err: string, result: IContentSpec ) => any): any
+    {
+        var err: string;
+        var _result: IContentSpec;
+        var array: String[];
+
+        // Do we have the parameters we need to proceed?
+        if ( 'function' !== typeof cb ) return;
+        if ( 'string' !== typeof spec || '' === spec ) 
+            return cb ( 'Cannot parse spec - expected string value', null ); 
+
+        _result.spec = spec;
+        _result.metadata = {'serverurl': this.url};   
+        
+        // Put the spec into a line-by-line array
+        array = spec.split("\n");
+        
+        // Iterate over the lines in the array and match against our regex patterns
+        for (var i = 0; i < array.length; i ++){
+           for (var j = 0; j < ContentSpecMetadataSchema.length; j++){
+                if (array[i].match(ContentSpecMetadataSchema[j].rule))
+                {  
+                    // remove trailing and leading whitespaces with regex
+                    _result.metadata[ContentSpecMetadataSchema[j].attr] = array[i].split('=')[1].replace(/^\s+|\s+$/g,'');
+                }
+           }
+        }    
+        
+    //    console.log(md);
+        cb( err, _result );
+    }
+
+    saveTopic( topic: ITopic, cb: ( err, result )=>any ): any
+    {
+    }
 }
