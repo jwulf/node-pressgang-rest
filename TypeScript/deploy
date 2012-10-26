@@ -11,9 +11,15 @@ then
 
 	echo "Running tests..."
 	# Now we see if we can pass the tests
-	jasmine-node --verbose ./../tests/wet-tests.spec.js;
+    TESTFAIL=0
 
-	if [ $? -eq 0 ]; then
+	jasmine-node --verbose ./../tests/wet-tests.spec.js;
+    if [ $? -ne 0 ]; then TESTFAIL=1; fi
+
+jasmine-node --verbose ./../tests/dry-tests.spec.js;
+    if [ $? -ne 0 ]; then TESTFAIL=1; fi
+
+	if [ $TESTFAIL -eq 0 ]; then
 		echo "Deploying..."
 		cp pressgangccms.d.ts ./../
 		cp pressgangccms.js ./../;
