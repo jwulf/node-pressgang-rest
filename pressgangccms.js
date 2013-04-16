@@ -154,7 +154,7 @@ var PressGangCCMS = (function () {
         if(typeof cb !== 'function') {
             return;
         }
-        if(typeof topic_id !== 'number') {
+        if(typeof parseInt(topic_id, 10) !== 'number') {
             return cb('Need numeric Topic ID as first argument', false);
         }
         this.getTopicData('topic_tags', topic_id, function (err, result) {
@@ -181,7 +181,7 @@ var PressGangCCMS = (function () {
         var _result;
 
         if('function' == typeof cb) {
-            if('number' !== typeof revORcb) {
+            if('number' !== typeof parseInt(revORcb,10)) {
                 if(cb) {
                     return cb('Need numerical topic revision as third argument', null);
                 }
