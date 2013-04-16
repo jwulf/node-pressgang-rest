@@ -196,7 +196,7 @@ var PressGangCCMS = (function () {
         if(!exports.DATA_REQ[data_request]) {
             return cb('Unsupported operation ' + data_request + ' passed as first argument', null);
         }
-        if('number' !== typeof topic_id) {
+        if('number' !== typeof parseInt(topic_id, 10)) {
             return cb('Need numerical Topic ID as second argument', null);
         }
         if('undefined' == typeof this.url || 'null' == typeof this.url || '' === this.url) {
@@ -228,6 +228,7 @@ var PressGangCCMS = (function () {
                 }
             }
             _this.log(_this.url + requestPath, 2);
+            
             restler.get(_this.url + requestPath).on('complete', function (result) {
                 if(result instanceof Error) {
                     return cb('REST err: ' + result, null);
