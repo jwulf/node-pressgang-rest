@@ -45,7 +45,7 @@ exports.ContentSpecMetadataSchema = [
     { attr: 'id',           rule: /^ID[ ]*((=.*)|$)/i } 
 ];
 
-function getTopic(url, id, revORcb, cb){
+exports.getTopic = function (url, id, revORcb, cb){
 /* Return the entire Topic record */
     var _cb, _rev, _req;
 
