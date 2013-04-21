@@ -1,5 +1,9 @@
 var restler = require("restler")
 
+/* This library defines an object PressGangCCMS, which can be used to do 
+    various operations, and also a library of quick and dirty topic functions 
+*/
+    
 exports.DEFAULT_URL = 'http://127.0.0.1:8080/TopicIndex';
 exports.CONTENT_SPEC_TAG_ID = 268;
 exports.REST_API_PATH = '/seam/resource/rest/';
@@ -40,6 +44,30 @@ exports.ContentSpecMetadataSchema = [
     { attr: 'dtd',          rule: /^DTD[ ]*((=.*)|$)/i }, 
     { attr: 'id',           rule: /^ID[ ]*((=.*)|$)/i } 
 ];
+
+function getTopic(url, id, revORcb, cb){
+/* Return the entire Topic record */
+    var _cb, _rev, _req;
+
+    // Deal with the optional revision parameter
+    if (typeof revORcb == 'function') _cb = revORcb;
+    if (typeof cb == 'function') {
+        _cb = cb;
+        _rev = revORcb;
+    }
+    
+    _req = exports.REST_API_PATH + '/topic/get/json/' + id;
+    if(_rev) {
+        _req += '/r/' + _rev;
+    }
+    restler.get(_req).on('complete', function getTopicCallback (data){
+        if (_cb) cb(data);
+    });
+}
+
+
+
+
 var PressGangCCMS = (function () {
     function PressGangCCMS(settings) {
         this.setSelf();
@@ -180,6 +208,8 @@ var PressGangCCMS = (function () {
             });
         });
     };
+    
+    
     PressGangCCMS.prototype.getSpec = function (spec_id, revORcb, cb) {
         var _this = this;
         var _rev;

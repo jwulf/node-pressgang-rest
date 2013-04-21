@@ -73,6 +73,20 @@ You can change the logging level of the PressGangCCMS Object to get details for 
 pressgang.loglevel = 2;
 ```
 
+You can also do quick and dirty topic operations, like this:
+
+`getTopic` returns a JSON representation of a topic. 
+
+```js
+PressGangCCMS.getTopic('http://localhost:8080', 3445, function(topic) { console.log(topic); });
+```
+
+`getTopic` takes an optional revision parameter between the topic ID and the callback. Here 3445 is the topic id, and 23433 is the revision:
+
+```js
+PressGangCCMS.getTopic('http://localhost:8080', 3445, 23433, function(topic) { console.log(topic); });
+```
+
 ##Source Code
 The source is hosted on github at https://github.com/jwulf/node-pressgang-rest.
 
