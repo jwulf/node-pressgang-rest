@@ -13,111 +13,32 @@ exports.DATA_REQ = {
     json: 'json'
 };
 exports.ContentSpecMetadataSchema = [
-    {
-        attr: 'specrevision',
-        rule: /^SPECREVISION[ ]*((=.*)|$)/i
-    }, 
-    {
-        attr: 'product',
-        rule: /^PRODUCT[ ]*((=.*)|$)/i
-    }, 
-    {
-        attr: 'checksum',
-        rule: /^CHECKSUM[ ]*((=.*)|$)/i
-    }, 
-    {
-        attr: 'subtitle',
-        rule: /^SUBTITLE[ ]*((=.*)|$)/i
-    }, 
-    {
-        attr: 'title',
-        rule: /^TITLE[ ]*((=.*)|$)/i
-    }, 
-    {
-        attr: 'edition',
-        rule: /^EDITION[ ]*((=.*)|$)/i
-    }, 
-    {
-        attr: 'bookversion',
-        rule: /^BOOK VERSION[ ]*((=.*)|$)/i
-    }, 
-    {
-        attr: 'pubsnumber',
-        rule: /^PUBSNUMBER[ ]*((=.*)|$)/i
-    }, 
-    {
-        attr: 'description',
-        rule: /^(DESCRIPTION|ABSTRACT)[ ]*((=.*)|$)/i
-    }, 
-    {
-        attr: 'copyright',
-        rule: /^COPYRIGHT HOLDER[ ]*((=.*)|$)/i
-    }, 
-    {
-        attr: 'debug',
-        rule: /^DEBUG[ ]*((=.*)|$)/i
-    }, 
-    {
-        attr: 'version',
-        rule: /^VERSION[ ]*((=.*)|$)/i
-    }, 
-    {
-        attr: 'brand',
-        rule: /^BRAND[ ]*((=.*)|$)/i
-    }, 
-    {
-        attr: 'buglinks',
-        rule: /^BUG[ ]*LINKS[ ]*((=.*)|$)/i
-    }, 
-    {
-        attr: 'bzproduct',
-        rule: /^BZPRODUCT[ ]*((=.*)|$)/i
-    }, 
-    {
-        attr: 'bzcomponent',
-        rule: /^BZCOMPONENT[ ]*((=.*)|$)/i
-    }, 
-    {
-        attr: 'bzversion',
-        rule: /^BZVERSION[ ]*((=.*)|$)/i
-    }, 
-    {
-        attr: 'surveylinks',
-        rule: /^SURVEY[ ]*LINKS[ ]*((=.*)|$)/i
-    }, 
-    {
-        attr: 'translocale',
-        rule: /^TRANSLATION LOCALE[ ]*((=.*)|$)/i
-    }, 
-    {
-        attr: 'type',
-        rule: /^TYPE[ ]*((=.*)|$)/i
-    }, 
-    {
-        attr: 'outputstyle',
-        rule: /^OUTPUT STYLE[ ]*((=.*)|$)/i
-    }, 
-    {
-        attr: 'publican.cfg',
-        rule: /^PUBLICAN\\.CFG[ ]*((=.*)|$)/i
-    }, 
-    {
-        attr: 'inlineinject',
-        rule: /^INLINE INJECTION[ ]*((=.*)|$)/i
-    }, 
-    {
-        attr: 'space',
-        rule: /^spaces[ ]*((=.*)|$)/i
-    }, 
-    {
-        attr: 'dtd',
-        rule: /^DTD[ ]*((=.*)|$)/i
-    }, 
-    {
-        attr: 'id',
-        rule: /^ID[ ]*((=.*)|$)/i
-    }, 
-    
+    { attr: 'specrevision', rule: /^SPECREVISION[ ]*((=.*)|$)/i }, 
+    { attr: 'product',      rule: /^PRODUCT[ ]*((=.*)|$)/i }, 
+    { attr: 'checksum',     rule: /^CHECKSUM[ ]*((=.*)|$)/i }, 
+    { attr: 'subtitle',     rule: /^SUBTITLE[ ]*((=.*)|$)/i }, 
+    { attr: 'title',        rule: /^TITLE[ ]*((=.*)|$)/i }, 
+    { attr: 'edition',      rule: /^EDITION[ ]*((=.*)|$)/i }, 
+    { attr: 'bookversion',  rule: /^BOOK VERSION[ ]*((=.*)|$)/i }, 
+    { attr: 'pubsnumber',   rule: /^PUBSNUMBER[ ]*((=.*)|$)/i }, 
+    { attr: 'description',  rule: /^(DESCRIPTION|ABSTRACT)[ ]*((=.*)|$)/i }, 
+    { attr: 'copyright',    rule: /^COPYRIGHT HOLDER[ ]*((=.*)|$)/i }, 
+    { attr: 'debug',        rule: /^DEBUG[ ]*((=.*)|$)/i }, 
+    { attr: 'version',      rule: /^VERSION[ ]*((=.*)|$)/i }, 
+    { attr: 'brand',        rule: /^BRAND[ ]*((=.*)|$)/i }, 
+    { attr: 'buglinks',     rule: /^BUG[ ]*LINKS[ ]*((=.*)|$)/i }, 
+    { attr: 'bzproduct',    rule: /^BZPRODUCT[ ]*((=.*)|$)/i }, 
+    { attr: 'bzcomponent',  rule: /^BZCOMPONENT[ ]*((=.*)|$)/i }, 
+    { attr: 'bzversion',    rule: /^BZVERSION[ ]*((=.*)|$)/i }, 
+    { attr: 'surveylinks',  rule: /^SURVEY[ ]*LINKS[ ]*((=.*)|$)/i }, 
+    { attr: 'translocale',  rule: /^TRANSLATION LOCALE[ ]*((=.*)|$)/i }, 
+    { attr: 'type',         rule: /^TYPE[ ]*((=.*)|$)/i }, 
+    { attr: 'outputstyle',  rule: /^OUTPUT STYLE[ ]*((=.*)|$)/i }, 
+    { attr: 'publican.cfg', rule: /^PUBLICAN\\.CFG[ ]*((=.*)|$)/i }, 
+    { attr: 'inlineinject', rule: /^INLINE INJECTION[ ]*((=.*)|$)/i }, 
+    { attr: 'space',        rule: /^spaces[ ]*((=.*)|$)/i }, 
+    { attr: 'dtd',          rule: /^DTD[ ]*((=.*)|$)/i }, 
+    { attr: 'id',           rule: /^ID[ ]*((=.*)|$)/i } 
 ];
 var PressGangCCMS = (function () {
     function PressGangCCMS(settings) {
