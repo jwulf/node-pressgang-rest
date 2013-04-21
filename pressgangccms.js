@@ -56,7 +56,7 @@ exports.getTopic = function (url, id, revORcb, cb){
         _rev = revORcb;
     }
     
-    _req = url + exports.REST_API_PATH + '/topic/get/json/' + id;
+    _req = url + exports.REST_API_PATH + 'topic/get/json/' + id;
     if(_rev) {
         _req += '/r/' + _rev;
     }
