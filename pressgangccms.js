@@ -61,7 +61,7 @@ exports.getTopic = function (url, id, revORcb, cb){
         _req += '/r/' + _rev;
     }
     restler.get(_req).on('complete', function getTopicCallback (data){
-        if (_cb) cb(data);
+        if (_cb) _cb(data);
     });
 }
 
