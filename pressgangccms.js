@@ -1,8 +1,12 @@
 var restler = require('restler'),
     fs = require('fs');
 
-/* This library defines an object PressGangCCMS, which can be used to do 
-    various operations, and also a library of quick and dirty topic functions 
+/* This library defines a library of topic functions 
+
+Uses a fork of restler, as per http://debuggable.com/posts/how-to-fork-patch-npm-modules:4e2eb9f3-e584-44be-b1a9-3db7cbdd56cb
+to deal with the "multiple complete callbacks when parsing JSON if callback code throws exception" issue
+
+
 */
     
 exports.getTopic = getTopic;
@@ -157,7 +161,7 @@ function stripMetadata (url, topic, cb) {
         revision: topic.revision,
         id: topic.id,
         content: topic.xml,
-        metadata: {}
+        metadata: {serverurl: url}
     };
     
 
