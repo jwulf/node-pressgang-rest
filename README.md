@@ -7,7 +7,50 @@ A node module that provides a REST client library for the PressGang CCMS. It pro
 ```bash
 npm install pressgang-rest
 ```
-## Basic Usage
+
+## Basic Usage v.0.1.0 and up
+
+```js
+var pressgang = require('pressgang-rest);
+```
+
+Get a topic:
+
+```js
+pressgang.getTopic('http://127.0.0.1:8080', 4324, {revision: 2343, expand: tags}, 
+    function (err, topic) {
+        if (err) return console.log(err);
+        console.log('Got Topic %s at revision %s', topic.id, topic.revision);
+        console.log('XML is %s', topic.xml);
+    });
+```
+
+`revision` and `expand` are optional. `expand` can take any of the root expandable entities, which include:
+
+```js
+tags
+incomingRelationships
+outgoingRelationships
+sourceUrls_OTM
+bugzillaBugs_OTM
+properties
+logDetails
+revisions
+```
+
+Get a Content Spec:
+
+```js
+pressgang.getSpec('http://127.0.0.1:8080', 7069, function (err, spec) {
+    if (err) return console.log(err);
+    console.log('Got Spec ID %s at revision %s', spec.id, spec.revision);
+    console.log('The spec contents: %s', spec.content);
+    console.log('The spec metadata: %s', JSON.stringify(spec.metadata));
+});
+```
+
+
+## Basic Usage v.0.0.13 and below
 
 First, require `pressgang-rest`:
 
@@ -35,7 +78,7 @@ To get the JSON representation of a topic:
 pressgang.getTopicData('json', 8445, 
 	function(err, result){
 		console.log('The JSON representation of the topic is:' 
-		+ JSON.Stringify(result);
+		+ JSON.stringify(result);
 	});
 ```
 
@@ -90,4 +133,6 @@ PressGangCCMS.getTopic('http://localhost:8080', 3445, 23433, function(topic) { c
 ##Source Code
 The source is hosted on github at https://github.com/jwulf/node-pressgang-rest.
 
-It's written using Microsoft TypeScript, and compiled to JavaScript using the node typescript module. There is a TypeScript declaration file in the module.
+Up to 0.0.13 it was written using Microsoft TypeScript, and compiled to JavaScript using the node typescript module. There is a TypeScript declaration file in the module.
+
+From 0.1.0 I made it straight-forward JavaScript. Tests have not been updated yet.

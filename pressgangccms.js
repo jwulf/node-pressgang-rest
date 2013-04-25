@@ -1,297 +1,231 @@
-var restler = require("restler")
+var restler = require('restler'),
+    fs = require('fs');
 
 /* This library defines an object PressGangCCMS, which can be used to do 
     various operations, and also a library of quick and dirty topic functions 
 */
     
-exports.DEFAULT_URL = 'http://127.0.0.1:8080/TopicIndex';
-exports.CONTENT_SPEC_TAG_ID = 268;
-exports.REST_API_PATH = '/seam/resource/rest/';
-exports.REST_UPDATE_TOPIC_PATH = 'topic/update/json';
-exports.DEFAULT_REST_VER = 1;
-exports.DEFAULT_LOG_LEVEL = 0;
-exports.DEFAULT_AUTH_METHOD = '';
-exports.DATA_REQ = {
-    xml: 'xml',
-    topic_tags: 'topic_tags',
-    json: 'json'
-};
-exports.ContentSpecMetadataSchema = [
-    { attr: 'specrevision', rule: /^SPECREVISION[ ]*((=.*)|$)/i }, 
-    { attr: 'product',      rule: /^PRODUCT[ ]*((=.*)|$)/i }, 
-    { attr: 'checksum',     rule: /^CHECKSUM[ ]*((=.*)|$)/i }, 
-    { attr: 'subtitle',     rule: /^SUBTITLE[ ]*((=.*)|$)/i }, 
-    { attr: 'title',        rule: /^TITLE[ ]*((=.*)|$)/i }, 
-    { attr: 'edition',      rule: /^EDITION[ ]*((=.*)|$)/i }, 
-    { attr: 'bookversion',  rule: /^BOOK VERSION[ ]*((=.*)|$)/i }, 
-    { attr: 'pubsnumber',   rule: /^PUBSNUMBER[ ]*((=.*)|$)/i }, 
-    { attr: 'description',  rule: /^(DESCRIPTION|ABSTRACT)[ ]*((=.*)|$)/i }, 
-    { attr: 'copyright',    rule: /^COPYRIGHT HOLDER[ ]*((=.*)|$)/i }, 
-    { attr: 'debug',        rule: /^DEBUG[ ]*((=.*)|$)/i }, 
-    { attr: 'version',      rule: /^VERSION[ ]*((=.*)|$)/i }, 
-    { attr: 'brand',        rule: /^BRAND[ ]*((=.*)|$)/i }, 
-    { attr: 'buglinks',     rule: /^BUG[ ]*LINKS[ ]*((=.*)|$)/i }, 
-    { attr: 'bzproduct',    rule: /^BZPRODUCT[ ]*((=.*)|$)/i }, 
-    { attr: 'bzcomponent',  rule: /^BZCOMPONENT[ ]*((=.*)|$)/i }, 
-    { attr: 'bzversion',    rule: /^BZVERSION[ ]*((=.*)|$)/i }, 
-    { attr: 'surveylinks',  rule: /^SURVEY[ ]*LINKS[ ]*((=.*)|$)/i }, 
-    { attr: 'translocale',  rule: /^TRANSLATION LOCALE[ ]*((=.*)|$)/i }, 
-    { attr: 'type',         rule: /^TYPE[ ]*((=.*)|$)/i }, 
-    { attr: 'outputstyle',  rule: /^OUTPUT STYLE[ ]*((=.*)|$)/i }, 
-    { attr: 'publican.cfg', rule: /^PUBLICAN\\.CFG[ ]*((=.*)|$)/i }, 
-    { attr: 'inlineinject', rule: /^INLINE INJECTION[ ]*((=.*)|$)/i }, 
-    { attr: 'space',        rule: /^spaces[ ]*((=.*)|$)/i }, 
-    { attr: 'dtd',          rule: /^DTD[ ]*((=.*)|$)/i }, 
-    { attr: 'id',           rule: /^ID[ ]*((=.*)|$)/i } 
-];
+exports.getTopic = getTopic;
+exports.getContentSpec = getContentSpec;
+exports.checkoutSpec = checkoutSpec;
+    
+var DEFAULT_URL = 'http://127.0.0.1:8080/TopicIndex',
+    CONTENT_SPEC_TAG_ID = 268,
+    REST_API_PATH = '/seam/resource/rest/',
+    REST_UPDATE_TOPIC_PATH = 'topic/update/json',
+    REST_GET_TOPIC_PATH = '/topic/get/json/',
+    DEFAULT_REST_VER = 1,
+    REST_V1_PATH = REST_API_PATH + '1',
+    REST_V1_UPDATE = REST_V1_PATH + REST_UPDATE_TOPIC_PATH,
+    REST_V1_GET = REST_V1_PATH + REST_GET_TOPIC_PATH,
+    DEFAULT_LOG_LEVEL = 0,
+    DEFAULT_AUTH_METHOD = '',
 
-exports.getTopic = function (url, id, revORcb, cb){
-/* Return the entire Topic record */
-    var _cb, _rev, _req;
+    ContentSpecMetadataSchema = [
+        { attr: 'specrevision', rule: /^SPECREVISION[ ]*((=.*)|$)/i }, 
+        { attr: 'product',      rule: /^PRODUCT[ ]*((=.*)|$)/i }, 
+        { attr: 'checksum',     rule: /^CHECKSUM[ ]*((=.*)|$)/i }, 
+        { attr: 'subtitle',     rule: /^SUBTITLE[ ]*((=.*)|$)/i }, 
+        { attr: 'title',        rule: /^TITLE[ ]*((=.*)|$)/i }, 
+        { attr: 'edition',      rule: /^EDITION[ ]*((=.*)|$)/i }, 
+        { attr: 'bookversion',  rule: /^BOOK VERSION[ ]*((=.*)|$)/i }, 
+        { attr: 'pubsnumber',   rule: /^PUBSNUMBER[ ]*((=.*)|$)/i }, 
+        { attr: 'description',  rule: /^(DESCRIPTION|ABSTRACT)[ ]*((=.*)|$)/i }, 
+        { attr: 'copyright',    rule: /^COPYRIGHT HOLDER[ ]*((=.*)|$)/i }, 
+        { attr: 'debug',        rule: /^DEBUG[ ]*((=.*)|$)/i }, 
+        { attr: 'version',      rule: /^VERSION[ ]*((=.*)|$)/i }, 
+        { attr: 'brand',        rule: /^BRAND[ ]*((=.*)|$)/i }, 
+        { attr: 'buglinks',     rule: /^BUG[ ]*LINKS[ ]*((=.*)|$)/i }, 
+        { attr: 'bzproduct',    rule: /^BZPRODUCT[ ]*((=.*)|$)/i }, 
+        { attr: 'bzcomponent',  rule: /^BZCOMPONENT[ ]*((=.*)|$)/i }, 
+        { attr: 'bzversion',    rule: /^BZVERSION[ ]*((=.*)|$)/i }, 
+        { attr: 'surveylinks',  rule: /^SURVEY[ ]*LINKS[ ]*((=.*)|$)/i }, 
+        { attr: 'translocale',  rule: /^TRANSLATION LOCALE[ ]*((=.*)|$)/i }, 
+        { attr: 'type',         rule: /^TYPE[ ]*((=.*)|$)/i }, 
+        { attr: 'outputstyle',  rule: /^OUTPUT STYLE[ ]*((=.*)|$)/i }, 
+        { attr: 'publican.cfg', rule: /^PUBLICAN\\.CFG[ ]*((=.*)|$)/i }, 
+        { attr: 'inlineinject', rule: /^INLINE INJECTION[ ]*((=.*)|$)/i }, 
+        { attr: 'space',        rule: /^spaces[ ]*((=.*)|$)/i }, 
+        { attr: 'dtd',          rule: /^DTD[ ]*((=.*)|$)/i }, 
+        { attr: 'id',           rule: /^ID[ ]*((=.*)|$)/i },
+        // begin Death Star Processor Directives
+        {attr : 'revhistory',   rule : /^#_DSD:REVHISTORY[ ]*((=.*)|$)/i}
+    ];
 
+/* 
+    getTopic
+    
+    Return the entire Topic record, optionally a specific revision, and optionally
+    expand tags.
+    
+    Example usage: 
+    getTopic('http://127.0.0.1:8080', 4324, {revision: 2343, expand: tags}, myCallback);    
+    
+    Gets revision 2343 of topic 4324 with the tags expanded.
+
+*/
+function getTopic (url, id, optsORcb, cb){
+
+    var _cb, _rev, _req, _expand, _opts;
+
+ 
     // Deal with the optional revision parameter
-    if (typeof revORcb == 'function') _cb = revORcb;
+    if (typeof optsORcb == 'function') _cb = optsORcb;
     if (typeof cb == 'function') {
         _cb = cb;
-        _rev = revORcb;
     }
     
-    _req = url + exports.REST_API_PATH + exports.DEFAULT_REST_VER + '/topic/get/json/' + id;
-    if(_rev) {
-        _req += '/r/' + _rev;
+    if (typeof optsORcb == 'object') {
+        _opts = optsORcb;
+        _rev = (_opts.revision) ? _opts.revision : null;
+        _expand = (_opts.expand) ? _opts.expand: null;
     }
-    restler.get(_req).on('complete', function getTopicCallback (data){
-        if (_cb) _cb(data);
+    
+    _req = url + REST_V1_GET + id;
+    if (_rev) 
+        _req += '/r/' + _rev;
+    
+    if (_expand) _req += '?expand=' + 
+        encodeURIComponent('{"branches":[{"trunk":{"name":"' + _expand + '"}}]}');
+    
+    restler.get(_req).on('complete', function getTopicCallback (topic){
+         if (topic instanceof Error && _cb) { 
+             _cb(topic);
+        } else {
+            if (_cb) return _cb (null, topic);
+        }
     });
 }
 
+/* 
+    getContentSpec
+    
+    Retrieves a content spec topic and returns an object with spec and metadata
+    attributes
 
-
-
-var PressGangCCMS = (function () {
-    function PressGangCCMS(settings) {
-        this.setSelf();
-        this.url = exports.DEFAULT_URL;
-        if('string' == typeof settings) {
-            this.url = settings;
+*/
+function getContentSpec (url, id, revORcb, cb) {
+    var _cb, _rev, _opts,
+        _is_spec = false;
+    
+    _cb = (typeof cb == 'function') ? cb: null;
+    _cb = (typeof revORcb == 'function') ? revORcb : _cb;
+    _rev = (typeof revORcb == 'string' || typeof revORcb == 'number') ? revORcb : null;
+    
+    _opts = {expand: 'tags'};
+    if (_rev) _opts.revision = _rev;
+    
+    getTopic(url, id, _opts, function (err, topic){
+        if (err && _cb) return _cb(err);
+        if (!topic && _cb) return _cb('Error: No topic data returned from REST call');
+        // Check if content spec
+        var _tags = topic.tags;
+        if (_tags && _tags.items && _tags.items.length > 0) {
+            for(var tag = 0; tag < _tags.items.length; tag++) {
+                if(_tags.items[tag].item.id && _tags.items[tag].item.id === CONTENT_SPEC_TAG_ID) { // 268
+                    _is_spec = true;
+                }
+            }
         }
-        if('object' == typeof settings && settings.url) {
-            this.url = settings.url;
-        }
-        this.restver = exports.DEFAULT_REST_VER;
-        this.loglevel = exports.DEFAULT_LOG_LEVEL;
-        if('object' == typeof settings) {
-            for(var i in settings) {
-                this[i] = settings[i];
+        
+        if (!_is_spec) return _cb('Topic ' + id + ' is not a Content Specification');
+        
+        stripMetadata(url, topic, _cb);
+    });
+}
+
+function stripMetadata (url, topic, cb) {
+    var err,
+        _result,
+        array,
+        spec;
+        
+    if('function' !== typeof cb) {
+        return;  // don't waste mah time!
+    }
+    
+    spec = topic.xml;
+    
+    if('string' !== typeof spec || '' === spec) {
+        return cb('Cannot parse spec - expected string value', null);
+    }
+    
+    _result = {
+        serverurl: url,
+        url: url,
+        revision: topic.revision,
+        id: topic.id,
+        content: topic.xml,
+        metadata: {}
+    };
+    
+
+    array = spec.split("\n");
+    for(var i = 0; i < array.length; i++) {
+        for(var j = 0; j < ContentSpecMetadataSchema.length; j++) {
+            if(array[i].match(ContentSpecMetadataSchema[j].rule)) {
+                _result.metadata[ContentSpecMetadataSchema[j].attr] = array[i].split('=')[1].replace(/^\s+|\s+$/g, '');
             }
         }
     }
-    PressGangCCMS.prototype.setSelf = function () {
-        this.self = this;
-    };
-    PressGangCCMS.prototype.supportedDataRequests = function () {
-        return exports.DATA_REQ;
-    };
-    PressGangCCMS.prototype.log = function (msg, msglevel) {
-        if(this.loglevel > msglevel) {
-            console.log(msg);
-        }
-    };
-    PressGangCCMS.prototype.isContentSpec = function (topic_id, cb) {
-        var _is_spec;
-        _is_spec = false;
-        if(typeof cb !== 'function') {
-            return;
-        }
-        if(typeof parseInt(topic_id, 10) !== 'number') {
-            return cb('Need numeric Topic ID as first argument', false);
-        }
-        this.getTopicData('topic_tags', topic_id, function (err, result) {
-            if(err) {
-                return cb(err, null);
-            }
-            if(result && result.length > 0) {
-                for(var i = 0; i < result.length; i++) {
-                    if(result[i].item.id && result[i].item.id === exports.CONTENT_SPEC_TAG_ID) {
-                        _is_spec = true;
-                    }
-                }
-            }
-            return cb(err, _is_spec);
-        });
-    };
-    PressGangCCMS.prototype.getTopicXML = function (topic_id, rev, cb) {
-        this.getTopicData('xml', topic_id, rev, cb);
-    };
-    PressGangCCMS.prototype.getTopicData = function (data_request, topic_id, revORcb, cb) {
-        var _this = this;
-        var _rev;
-        var _restver;
-        var _result;
+    cb(err, _result);
+}
 
-        if('function' == typeof cb) {
-            if('number' !== typeof parseInt(revORcb,10)) {
-                if(cb) {
-                    return cb('Need numerical topic revision as third argument', null);
-                }
-            }
-        }
-        if('function' == typeof revORcb) {
-            cb = revORcb;
-        }
-        if(!cb) {
-            return;
-        }
-        if(!exports.DATA_REQ[data_request]) {
-            return cb('Unsupported operation ' + data_request + ' passed as first argument', null);
-        }
-        if('number' !== typeof parseInt(topic_id, 10)) {
-            return cb('Need numerical Topic ID as second argument', null);
-        }
-        if('undefined' == typeof this.url || 'null' == typeof this.url || '' === this.url) {
-            return cb('No server URL specified', null);
-        }
-        if(('number' == typeof revORcb) && (-1 !== revORcb)) {
-            _rev = revORcb;
-        }
-        this.getBaseRESTPath(function (requestPath) {
-            switch(data_request) {
-                case exports.DATA_REQ.xml:
-                case exports.DATA_REQ.json: {
-                    requestPath += '/topic/get/json/' + topic_id;
-                    if(_rev) {
-                        requestPath += '/r/' + _rev;
-                    }
-                    break;
+// Not finished - should probably rip the code from lib/topicdriver.js
+function saveTopic (topic, log_msg, change_impact, cb) {
+    var CHANGE = {MINOR: 1,
+        MAJOR: 2};
+    this.getBaseRESTPath(function (requestPath) {
+        requestPath += exports.REST_UPDATE_TOPIC_PATH;
+        requestPath += '?message=';
+        requestPath += encodeURIComponent(log_msg);
+        requestPath += '&flag=';
+        requestPath += '' + change_impact;
+    });
+}
 
-                }
-                case exports.DATA_REQ.topic_tags: {
-                    requestPath += '/topic/get/json/' + topic_id;
-                    if(_rev) {
-                        requestPath += '/r/' + _rev;
-                    }
-                    requestPath += '?expand=';
-                    requestPath += encodeURIComponent('{"branches":[{"trunk":{"name":"tags"}}]}');
-                    break;
-
-                }
-            }
-            _this.log(_this.url + requestPath, 2);
+function checkoutSpec (url, id, basedir, cb) {
+    
+    getContentSpec(url, id, function (err, spec){
+        if (err) return cb(err); // Covers "topic is not a content spec"
+        
+        fs.exists(basedir, function(exists) {
+            if (!exists) 
+                return cb('The specified checkout working directory does not exist');
             
-            restler.get(_this.url + requestPath).on('complete', function (result) {
-                if(result instanceof Error) {
-                    return cb('REST err: ' + result, null);
-                }
-                if(!result) {
-                    return cb('Could not get data from server', null);
-                }
-                _result = result;
-                switch(data_request) {
-                    case exports.DATA_REQ.topic_tags: {
-                        if(!result.tags) {
-                            _result = [];
-                        } else {
-                            _result = result.tags.items;
-                        }
-                        break;
+            var productdir = basedir + '/' + spec.metadata.product.replace(/ /g, "_");
+            spec.metadata.bookdir = productdir + '/' + spec.id + '-' + spec.metadata.title.replace(/ /g, "_") + '-' + spec.metadata.version;
+                createDir(productdir, function(err) {
+                    if (err) return cb(err, spec);
+                    
+                    createDir(spec.metadata.bookdir, function(err) {
+                        if (err) return cb(err, spec);
+                        var conffile = spec.metadata.bookdir + '/csprocessor.cfg';
 
-                    }
-                    case exports.DATA_REQ.xml: {
-                        _result = result.xml;
-                        break;
+                        var conf = [
+                            '#SPEC_TITLE=' + spec.metadata.title.replace(/ /g, "_"),
+                            'SPEC_ID=' + id, 
+                            'SERVER_URL=' + url,
+                            ''
+                        ].join('\n');
 
-                    }
-                }
-                if(cb) {
-                    return cb(null, _result);
-                }
-            });
-        });
-    };
-    
-    
-    PressGangCCMS.prototype.getSpec = function (spec_id, revORcb, cb) {
-        var _this = this;
-        var _rev;
-        _rev = -1;
-        if('function' == typeof revORcb) {
-            cb = revORcb;
-        }
-        if('number' == typeof revORcb) {
-            _rev = revORcb;
-        }
-        if('function' !== typeof cb) {
-            return;
-        }
-        if('number' !== typeof spec_id) {
-            cb('Numeric Spec ID needed as first argument', null);
-        }
-        this.isContentSpec(spec_id, function (err, is) {
-            if(err) {
-                return cb(err, null);
-            }
-            if(!is) {
-                return cb('Requested ID is not a Content Specification', null);
-            }
-            _this.getTopicData(exports.DATA_REQ.xml, spec_id, _rev, function (err, result) {
-                if(err) {
-                    return cb(err, result);
-                }
-                _this.stripMetadata(result, function getSpecRevStripMetadataCall(err, result) {
-                    return cb(err, result);
+                        fs.writeFile(conffile, conf, function(err) {
+                            cb(err, spec);
+                        });
+                       
+                    });
                 });
-            });
-        });
-    };
-    PressGangCCMS.prototype.stripMetadata = function (spec, cb) {
-        var err;
-        var _result;
-        var array;
-        if('function' !== typeof cb) {
-            return;
-        }
-        if('string' !== typeof spec || '' === spec) {
-            return cb('Cannot parse spec - expected string value', null);
-        }
-        _result = {
-        };
-        _result.spec = spec;
-        _result.metadata = {
-            'serverurl': this.url
-        };
-        array = spec.split("\n");
-        for(var i = 0; i < array.length; i++) {
-            for(var j = 0; j < exports.ContentSpecMetadataSchema.length; j++) {
-                if(array[i].match(exports.ContentSpecMetadataSchema[j].rule)) {
-                    _result.metadata[exports.ContentSpecMetadataSchema[j].attr] = array[i].split('=')[1].replace(/^\s+|\s+$/g, '');
-                }
-            }
-        }
-        cb(err, _result);
-    };
-    PressGangCCMS.prototype.getBaseRESTPath = function (cb) {
-        var requestPath;
-        var _restver;
+        });    
+        
+    });
+}
 
-        requestPath = exports.REST_API_PATH;
-        _restver = this.restver || exports.DEFAULT_REST_VER;
-        requestPath += _restver;
-        return cb(requestPath);
-    };
-    PressGangCCMS.prototype.saveTopic = function (topic, log_msg, change_impact, cb) {
-        var CHANGE = {
-            MINOR: 1,
-            MAJOR: 2
-        };
-        this.getBaseRESTPath(function (requestPath) {
-            requestPath += exports.REST_UPDATE_TOPIC_PATH;
-            requestPath += '?message=';
-            requestPath += encodeURIComponent(log_msg);
-            requestPath += '&flag=';
-            requestPath += '' + change_impact;
-        });
-    };
-    return PressGangCCMS;
-})();
-exports.PressGangCCMS = PressGangCCMS;
-
+function createDir(dir, cb)
+{
+    fs.exists(dir, function(exists){
+        if (exists) {cb();} else
+        {
+            fs.mkdir(dir, cb);
+        }
+    });
+}

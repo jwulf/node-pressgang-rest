@@ -1,6 +1,6 @@
 {
   "name": "pressgang-rest",
-  "version": "0.0.13",
+  "version": "0.1.0",
   "description": "A high level library for REST communication with a PressGang Component Content Management System (CCMS) Server",
   "main": "index.js",
   "scripts": {
@@ -17,7 +17,7 @@
   "author": "Joshua Wulf",
   "license": "BSD",
   "dependencies": {
-    "restler": "~2.0.1"
+    "restler": "https://github.com/jwulf/restler/tarball/eb33b68d5af6e18a92d818e07de9dfa39ab2056a"
   },
   "directories": {
     "doc": ".",
