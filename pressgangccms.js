@@ -49,7 +49,8 @@ var DEFAULT_URL = 'http://127.0.0.1:8080/TopicIndex',
         { attr: 'dtd',          rule: /^DTD[ ]*((=.*)|$)/i }, 
         { attr: 'id',           rule: /^ID[ ]*((=.*)|$)/i },
         // begin Death Star Processor Directives
-        {attr : 'revhistory',   rule : /^#_DSD:REVHISTORY[ ]*((=.*)|$)/i}
+        {attr: 'revhistory',    rule: /^#_DSD:REVISION HISTORY[ ]*((=.*)|$)/i},
+        {attr: 'entityfile',    rule: /^#_DSD:ENTITY FILE[ ]*((=.*)|$)/i}
     ];
 
 /* 
