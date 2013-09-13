@@ -1,6 +1,6 @@
 {
   "name": "pressgang-rest",
-  "version": "0.2",
+  "version": "0.2.0",
   "description": "A high level library for REST communication with a PressGang Component Content Management System (CCMS) Server",
   "main": "index.js",
   "scripts": {
