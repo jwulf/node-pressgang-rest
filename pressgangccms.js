@@ -12,16 +12,19 @@ to deal with the "multiple complete callbacks when parsing JSON if callback code
 exports.getTopic = getTopic;
 exports.getContentSpec = getContentSpec;
 exports.checkoutSpec = checkoutSpec;
+exports.getTopicTags = getTopicTags;
     
 var DEFAULT_URL = 'http://127.0.0.1:8080/TopicIndex',
     CONTENT_SPEC_TAG_ID = 268,
     REST_API_PATH = '/seam/resource/rest/',
     REST_UPDATE_TOPIC_PATH = 'topic/update/json',
     REST_GET_TOPIC_PATH = '/topic/get/json/',
+    REST_GET_SPEC_PATH = '/contentspec/get/text/',
     DEFAULT_REST_VER = 1,
     REST_V1_PATH = REST_API_PATH + '1',
     REST_V1_UPDATE = REST_V1_PATH + REST_UPDATE_TOPIC_PATH,
     REST_V1_GET = REST_V1_PATH + REST_GET_TOPIC_PATH,
+    REST_V1_GET_SPEC = REST_V1_PATH + REST_GET_SPEC_PATH,
     DEFAULT_LOG_LEVEL = 0,
     DEFAULT_AUTH_METHOD = '',
 
@@ -69,9 +72,23 @@ var DEFAULT_URL = 'http://127.0.0.1:8080/TopicIndex',
     Gets revision 2343 of topic 4324 with the tags expanded.
 
 */
+
+function getTopicTags (url, id, cb) {
+	if (cb && typeof cb === 'function') {
+		getTopic(url, id, {expand: 'tags'}, function getTopicTagsCallback (err, response) {
+			if (err) { cb(err); }
+			else {
+				if (response.tags && response.tags.items)
+					{ cb(null, response.tags.items); }
+				else { cb({error: 'Unexpected response', response: response}); }
+			}		
+		});	
+	}
+}
+
 function getTopic (url, id, optsORcb, cb){
 
-    var _cb, _rev, _req, _expand, _opts;
+    var _cb, _rev, _req, _expand, _opts, restPath;
 
  
     // Deal with the optional revision parameter
@@ -80,27 +97,42 @@ function getTopic (url, id, optsORcb, cb){
         _cb = cb;
     }
     
+    restPath = REST_V1_GET;
+    
     if (typeof optsORcb == 'object') {
         _opts = optsORcb;
         _rev = (_opts.revision) ? _opts.revision : null;
         _expand = (_opts.expand) ? _opts.expand: null;
+        restPath = (_opts.contentspec) ? REST_V1_GET_SPEC : restPath;
     }
     
-    _req = url + REST_V1_GET + id;
+    _req = url + restPath + id;
     if (_rev) 
         _req += '/r/' + _rev;
     
     if (_expand) _req += '?expand=' + 
         encodeURIComponent('{"branches":[{"trunk":{"name":"' + _expand + '"}}]}');
     
-    restler.get(_req).on('complete', function getTopicCallback (topic){
+	console.log(_req);
+    restler.get(_req).on('success', function getTopicCallback (topic, response){
+		console.log('Success');
          if (topic instanceof Error && _cb) { 
              _cb(topic);
         } else {
-            if (_cb) return _cb (null, topic);
+            if (_cb) { return _cb (null, topic); }
         }
-    });
+    }).on('failure', function getTopicFailure (topic,response) {
+		console.log('Failure');
+    	if (_cb) { _cb(response); }	
+    }).on('error', function getTopicError (topic,response) {
+		console.log('Error');
+    	if (_cb) { _cb(topic); }	
+    }).on('4XX', function getTopicError (topic,response) {
+		console.log('4XX');
+    	if (_cb) { _cb(topic); }
+	});
 }
+
 
 /* 
     getContentSpec
@@ -110,6 +142,10 @@ function getTopic (url, id, optsORcb, cb){
 
 */
 function getContentSpec (url, id, revORcb, cb) {
+	
+	// can also use: rest/1/contentspec/get/json+text/12339?expand=%7B"branches"%3A%5B%7B"trunk"%3A%7B"name"%3A%20"text"%7D%7D%5D%7D
+	// to get json + text
+	
     var _cb, _rev, _opts,
         _is_spec = false;
     
@@ -117,39 +153,26 @@ function getContentSpec (url, id, revORcb, cb) {
     _cb = (typeof revORcb == 'function') ? revORcb : _cb;
     _rev = (typeof revORcb == 'string' || typeof revORcb == 'number') ? revORcb : null;
     
-    _opts = {expand: 'tags'};
+    _opts= {};
     if (_rev) _opts.revision = _rev;
+    _opts.contentspec = true;
     
     getTopic(url, id, _opts, function (err, topic){
         if (err && _cb) return _cb(err);
         if (!topic && _cb) return _cb('Error: No topic data returned from REST call');
-        // Check if content spec
-        var _tags = topic.tags;
-        if (_tags && _tags.items && _tags.items.length > 0) {
-            for(var tag = 0; tag < _tags.items.length; tag++) {
-                if(_tags.items[tag].item.id && _tags.items[tag].item.id === CONTENT_SPEC_TAG_ID) { // 268
-                    _is_spec = true;
-                }
-            }
-        }
-        
-        if (!_is_spec) return _cb('Topic ' + id + ' is not a Content Specification');
-        
-        stripMetadata(url, topic, _cb);
+          
+        stripMetadata(url, id, topic, _cb);
     });
 }
 
-function stripMetadata (url, topic, cb) {
+function stripMetadata (url, id, spec, cb) {
     var err,
         _result,
-        array,
-        spec;
+        array;
         
     if('function' !== typeof cb) {
         return;  // don't waste mah time!
     }
-    
-    spec = topic.xml;
     
     if('string' !== typeof spec || '' === spec) {
         return cb('Cannot parse spec - expected string value', null);
@@ -158,13 +181,11 @@ function stripMetadata (url, topic, cb) {
     _result = {
         serverurl: url,
         url: url,
-        revision: topic.revision,
-        id: topic.id,
-        content: topic.xml,
+        id: id,
+        content: spec,
         metadata: {serverurl: url}
     };
     
-
     array = spec.split("\n");
     for(var i = 0; i < array.length; i++) {
         for(var j = 0; j < ContentSpecMetadataSchema.length; j++) {
