@@ -1,10 +1,10 @@
 {
   "name": "pressgang-rest",
-  "version": "0.1.2",
+  "version": "0.2",
   "description": "A high level library for REST communication with a PressGang Component Content Management System (CCMS) Server",
   "main": "index.js",
   "scripts": {
-    "test": "jasmine-node tests/dry-tests.spec.js"
+    "test": "jasmine-node tests/wet-tests.spec.js"
   },
   "repository": {
     "type": "git",
